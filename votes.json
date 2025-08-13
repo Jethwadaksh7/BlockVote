@@ -1,0 +1,44 @@
+[
+  {
+    "voterId": "DAKSH-001",
+    "encryptedVote": "f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2",
+    "transactionHash": "c878f9bfc4029471e29f3ea56e02222c525dbbe9c9d622b080eab78937510cef",
+    "timestamp": "2025-08-11T16:51:39.105Z"
+  },
+  {
+    "voterId": "DAKSH-001",
+    "encryptedVote": "f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2",
+    "transactionHash": "7e8daf129872d8e9fe432e0752679febaa80e2c3c39bd0dde54208927909c84a",
+    "timestamp": "2025-08-11T16:54:23.089Z"
+  },
+  {
+    "voterId": "DAKSH-001",
+    "encryptedVote": "f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2",
+    "transactionHash": "421a30f1b816e39eaaa42f9b61b687c2e3bfac7b01a13bc964f243c55df7d84d",
+    "timestamp": "2025-08-11T17:33:19.543Z"
+  },
+  {
+    "voterId": "DAKSH-001",
+    "encryptedVote": "f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2",
+    "transactionHash": "218aeffaa6023556c4e0511dbefbdee3c6496289715559b90b4366e087eebb78",
+    "timestamp": "2025-08-11T17:33:26.254Z"
+  },
+  {
+    "voterId": "DAKSH-001",
+    "encryptedVote": "f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2",
+    "transactionHash": "147731ae161ef8a7ae90e2f0bb610b0c06d23eb08d89df0ef6b590363449770c",
+    "timestamp": "2025-08-11T18:45:21.176Z"
+  },
+  {
+    "voterId": "Mahesh",
+    "encryptedVote": "f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2",
+    "transactionHash": "5707e6dfd1b35da52fadeeaa81c0fed7cf951039305b0051540fb501fe3ad25b",
+    "timestamp": "2025-08-12T04:07:48.895Z"
+  },
+  {
+    "voterId": "bihari",
+    "encryptedVote": "f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2",
+    "transactionHash": "cf928accc0fcc13c7fd6eba4c635f0411ee3b78792a9734077aff3fba10d7df7",
+    "timestamp": "2025-08-12T04:08:19.209Z"
+  }
+]

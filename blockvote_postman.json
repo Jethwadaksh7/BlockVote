@@ -1,0 +1,47 @@
+{
+  "info": {
+    "name": "BlockVote API",
+    "_postman_id": "12345678-abcd-efgh-ijkl-987654321000",
+    "description": "Postman collection to test the BlockVote Gateway API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Test GET /",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": [""]
+        }
+      }
+    },
+    {
+      "name": "Submit Vote",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"voterId\": \"ABC123\",\n    \"encryptedVote\": \"ENCRYPTED_DATA_EXAMPLE\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/vote",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["vote"]
+        }
+      }
+    }
+  ]
+}
