@@ -3,82 +3,75 @@ const bodyParser = require("body-parser");
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
+const { Web3 } = require('web3');
+
+// --- BLOCKCHAIN & CONTRACT CONFIGURATION ---
+const web3 = new Web3('http://localhost:7545');
+
+// Load the contract's ABI
+const abi = JSON.parse(fs.readFileSync('BallotABI.json', 'utf8'));
+
+// The address of your DEPLOYED Ballot contract
+const contractAddress = '0x9474EcA5002C3A0A9dd8924ef12136601aFaD098'; // <-- Paste your new address here
+
+// Create an instance of your contract
+const ballotContract = new web3.eth.Contract(abi, contractAddress);
 
 const app = express();
 app.use(bodyParser.json());
-
-const VOTES_FILE = path.join(__dirname, "votes.json");
-
-// Ensure votes.json exists
-if (!fs.existsSync(VOTES_FILE)) {
-    console.log("Creating votes.json file...");
-    fs.writeFileSync(VOTES_FILE, JSON.stringify([]));
-}
 
 // Test route
 app.get("/", (req, res) => {
     res.send("BlockVote Gateway is running!");
 });
 
-// Vote submission route
-app.post("/vote", (req, res) => {
+// --- UPDATED VOTE SUBMISSION ROUTE ---
+app.post("/vote", async (req, res) => {
     const { voterId, encryptedVote } = req.body;
 
     if (!voterId || !encryptedVote) {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const txHash = crypto.createHash("sha256")
-        .update(encryptedVote + Date.now())
-        .digest("hex");
-
-    console.log("New vote received:");
-    console.log("Voter ID:", voterId);
-    console.log("Encrypted Vote:", encryptedVote);
-    console.log("Transaction Hash:", txHash);
+    console.log("New vote received for Voter ID:", voterId);
 
     try {
-        // Load existing votes
-        let votes = JSON.parse(fs.readFileSync(VOTES_FILE));
+        // Get the deployer account from Ganache to send the transaction
+        const accounts = await web3.eth.getAccounts();
+        const fromAccount = accounts[0];
 
-        // Add new vote
-        votes.push({
-            voterId,
-            encryptedVote,
-            transactionHash: txHash,
-            timestamp: new Date().toISOString()
+        // Create a unique hash for this specific vote to store on-chain
+        const voteHash = web3.utils.sha3(encryptedVote);
+
+        console.log(`Submitting vote with hash: ${voteHash}`);
+
+        // Send a transaction to the smart contract's castVote function
+        const receipt = await ballotContract.methods.castVote(voteHash).send({
+            from: fromAccount,
+            gas: '1000000'
         });
 
-        // Write back to the file
-        fs.writeFileSync(VOTES_FILE, JSON.stringify(votes, null, 2));
+        console.log(`✅ Vote successfully recorded on the blockchain.`);
 
-        console.log("Successfully wrote to votes.json"); // Added success log
-
+        // Return the real transaction hash
         res.json({
-            message: "Vote recorded successfully",
-            transactionHash: txHash
+            message: "Vote recorded successfully on the blockchain",
+            transactionHash: receipt.transactionHash
         });
 
     } catch (error) {
-        console.error("!!! FAILED TO WRITE TO FILE !!!:", error); // Vital error log
-        res.status(500).json({ error: "Could not save the vote." });
+        console.error('❌ Error submitting vote to the blockchain:', error.message);
+        res.status(500).json({
+            error: "Failed to record vote on the blockchain.",
+            details: error.message
+        });
     }
 });
 
-
-// View all stored votes
-app.get("/results", (req, res) => {
-    try {
-        const votes = JSON.parse(fs.readFileSync(VOTES_FILE));
-        res.json(votes);
-    } catch (error) {
-        console.error("Could not read votes.json:", error);
-        res.status(500).json({ error: "Could not retrieve results." });
-    }
-});
 
 // Start server
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`BlockVote Gateway running on port ${PORT}`);
+    console.log(`Connected to smart contract at address: ${contractAddress}`);
 });
