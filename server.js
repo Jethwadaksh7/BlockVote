@@ -1,75 +1,63 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const crypto = require("crypto");
 const fs = require("fs");
-const path = require("path");
 const { Web3 } = require('web3');
+
+// --- READ CONFIGURATION ---
+const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+const contractAddress = config.contractAddress;
 
 // --- BLOCKCHAIN & CONTRACT CONFIGURATION ---
 const web3 = new Web3('http://localhost:7545');
-
-// Load the contract's ABI
 const abi = JSON.parse(fs.readFileSync('BallotABI.json', 'utf8'));
-
-// The address of your DEPLOYED Ballot contract
-const contractAddress = '0x9474EcA5002C3A0A9dd8924ef12136601aFaD098'; // <-- Paste your new address here
-
-// Create an instance of your contract
 const ballotContract = new web3.eth.Contract(abi, contractAddress);
 
 const app = express();
 app.use(bodyParser.json());
 
-// Test route
+// (The rest of your server.js code remains the same...)
+
 app.get("/", (req, res) => {
     res.send("BlockVote Gateway is running!");
 });
 
-// --- UPDATED VOTE SUBMISSION ROUTE ---
 app.post("/vote", async (req, res) => {
-    const { voterId, encryptedVote } = req.body;
-
-    if (!voterId || !encryptedVote) {
-        return res.status(400).json({ error: "Missing required fields" });
+    const { voterId, candidateId } = req.body;
+    if (!voterId || candidateId === undefined) {
+        return res.status(400).json({ error: "voterId and candidateId are required." });
     }
-
-    console.log("New vote received for Voter ID:", voterId);
-
+    console.log(`New vote received for Voter ID: ${voterId} for Candidate ID: ${candidateId}`);
     try {
-        // Get the deployer account from Ganache to send the transaction
         const accounts = await web3.eth.getAccounts();
         const fromAccount = accounts[0];
-
-        // Create a unique hash for this specific vote to store on-chain
-        const voteHash = web3.utils.sha3(encryptedVote);
-
-        console.log(`Submitting vote with hash: ${voteHash}`);
-
-        // Send a transaction to the smart contract's castVote function
-        const receipt = await ballotContract.methods.castVote(voteHash).send({
-            from: fromAccount,
-            gas: '1000000'
-        });
-
+        console.log(`Submitting vote to smart contract...`);
+        const receipt = await ballotContract.methods.castVote(candidateId, voterId).send({ from: fromAccount, gas: '1000000' });
         console.log(`✅ Vote successfully recorded on the blockchain.`);
-
-        // Return the real transaction hash
-        res.json({
-            message: "Vote recorded successfully on the blockchain",
-            transactionHash: receipt.transactionHash
-        });
-
+        res.json({ message: "Vote recorded successfully on the blockchain", transactionHash: receipt.transactionHash });
     } catch (error) {
         console.error('❌ Error submitting vote to the blockchain:', error.message);
-        res.status(500).json({
-            error: "Failed to record vote on the blockchain.",
-            details: error.message
-        });
+        const reason = error.data?.message || "Execution reverted.";
+        res.status(500).json({ error: "Failed to record vote on the blockchain.", details: reason });
     }
 });
 
+app.get("/results", async (req, res) => {
+    try {
+        console.log("Fetching election results from the blockchain...");
+        const results = [];
+        const candidatesCount = await ballotContract.methods.getCandidatesCount().call();
+        for (let i = 0; i < candidatesCount; i++) {
+            const candidate = await ballotContract.methods.candidates(i).call();
+            results.push({ id: i, name: candidate.name, voteCount: candidate.voteCount.toString() });
+        }
+        console.log("✅ Results fetched successfully.");
+        res.json(results);
+    } catch (error) {
+        console.error("❌ Error fetching results:", error.message);
+        res.status(500).json({ error: "Could not retrieve results from the blockchain." });
+    }
+});
 
-// Start server
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`BlockVote Gateway running on port ${PORT}`);
