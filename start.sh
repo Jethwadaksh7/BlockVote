@@ -15,7 +15,7 @@ echo "📝 3. Registering candidates..."
 # Ask the user how many candidates to add
 read -p "Enter the number of candidates you want to register: " count
 
-# Loop that many times to get each candidate's name
+# Loop that many times to get each candidate's name 
 for (( i=1; i<=count; i++ ))
 do
   read -p "Enter the name for Candidate #$i: " candidate_name
